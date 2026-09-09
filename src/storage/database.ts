@@ -2,6 +2,8 @@ import * as SQLite from 'expo-sqlite';
 import { trailKeys } from '../../modules/trail-keys/src/trail-keys';
 import { randomHex, readSecret, writeSecret } from '../security/secure-values';
 
+import { runEncryptedTransaction, unlockConnection } from './encrypted-transaction';
+
 let databasePromise: Promise<SQLite.SQLiteDatabase> | undefined;
 
 export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -15,8 +17,7 @@ async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (!/^[a-f0-9]{64}$/.test(key)) throw new Error('The database key is invalid.');
   const database = await SQLite.openDatabaseAsync('location-log.db');
   try {
-    // PRAGMA does not support bound parameters. Only a validated random hex key enters this statement.
-    await database.execAsync(`PRAGMA key = "x'${key}'";`);
+    await unlockConnection(database, key);
     const cipher = await database.getFirstAsync<{ cipher_version: string }>('PRAGMA cipher_version');
     if (!cipher?.cipher_version) throw new Error('Encrypted storage requires a development build. Expo Go is unsupported.');
     await trailKeys.protectStorage();
@@ -45,4 +46,13 @@ export async function readMetadata(key: string): Promise<string | null> {
 export async function writeMetadata(key: string, value: string): Promise<void> {
   const database = await getDatabase();
   await database.runAsync('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)', key, value);
+}
+
+/** Opens a fresh connection with the same encryption key for an isolated writer. */
+export async function withEncryptedWrite<T>(operation: (transaction: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {
+  await getDatabase();
+  const key = await readSecret('database-key-v1');
+  if (!key) throw new Error('The database key is missing. Existing history has been preserved.');
+  const connection = await SQLite.openDatabaseAsync('location-log.db', { useNewConnection: true });
+  return runEncryptedTransaction(connection, key, operation);
 }

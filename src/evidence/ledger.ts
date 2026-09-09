@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { trailKeys, type DeviceKey } from '../../modules/trail-keys/src/trail-keys';
-import { getDatabase, readMetadata, writeMetadata } from '../storage/database';
+import { getDatabase, readMetadata, writeMetadata, withEncryptedWrite } from '../storage/database';
 import { hashText, readSecret, writeSecret } from '../security/secure-values';
 import { encodeRecord, FORMAT, GENESIS, type RecordBody, type SignedRecord } from './record';
 
@@ -37,8 +37,7 @@ export function appendRecord(kind: RecordBody['kind'], payload: Record<string, u
 
 async function commitRecord(kind: RecordBody['kind'], payload: Record<string, unknown>): Promise<void> {
   const identity = await getIdentity();
-  const database = await getDatabase();
-  await database.withExclusiveTransactionAsync(async transaction => {
+  const head = await withEncryptedWrite(async transaction => {
     const previous = await transaction.getFirstAsync<SignedRecord & { sequence: number }>('SELECT * FROM records ORDER BY sequence DESC LIMIT 1');
     const body: RecordBody = { format: FORMAT, sequence: (previous?.sequence ?? 0) + 1,
       previousHash: previous?.hash ?? GENESIS, keyId: identity.keyId, recordedAt: Date.now(),
@@ -47,8 +46,8 @@ async function commitRecord(kind: RecordBody['kind'], payload: Record<string, un
     const [hash, signature] = await Promise.all([hashText(encoded), trailKeys.sign(encoded)]);
     await transaction.runAsync('INSERT INTO records VALUES (?, ?, ?, ?, ?, ?)',
       body.sequence, encoded, hash, signature, kind, body.recordedAt);
+    return { hash, sequence: body.sequence };
   });
-  const head = await database.getFirstAsync<{ hash: string; sequence: number }>('SELECT hash, sequence FROM records ORDER BY sequence DESC LIMIT 1');
   await writeSecret('ledger-checkpoint-v1', JSON.stringify(head));
 }
 

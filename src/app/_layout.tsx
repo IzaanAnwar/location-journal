@@ -8,7 +8,7 @@ export default function Layout() {
     <Stack screenOptions={{ headerStyle: { backgroundColor: palette.background },
       headerTintColor: palette.ink, headerShadowVisible: false,
       contentStyle: { backgroundColor: palette.background } }}>
-      <Stack.Screen name="index" options={{ title: 'Location Log' }} />
+      <Stack.Screen name="index" options={{ title: 'Location Journal' }} />
     </Stack>
   </>;
 }

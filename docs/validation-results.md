@@ -21,3 +21,11 @@ No independent timestamp provider, remote attestation verifier, or legally signe
 The [first GitHub Actions APK build](https://github.com/IzaanAnwar/location-journal/actions/runs/34362059071) passed on 9 September 2026 for commit `7f20f7d114b9594e91260a702fef61328c20f145`. Node 24 typechecking and all 11 tests passed. Gradle compiled and packaged a standalone release-variant APK for ARM64 and ARMv7, including the local signing module and SQLCipher configuration. The build uses the public Expo template debug signing key and is for testing only.
 
 This establishes Android compilation and packaging, not successful installation, runtime behavior, hardware key protection, or background recording on a physical phone. The download includes matching source, license notices, the commit ID, and checksums.
+
+## Encrypted writer and Android button correction
+
+The Android 13 report showed `file is not a database` when starting a session, after device identity loaded successfully. Inspection of Expo SQLite's exclusive transaction helper showed that it opens a second connection without replaying `PRAGMA key`. The recorder now opens its own dedicated connection, applies the existing key before accessing database pages, and uses `BEGIN IMMEDIATE` with commit/rollback and close. No database reset, key replacement, or record migration is part of this fix.
+
+Expo UI's Android button implementation renders raw children directly into Compose. All recorder buttons now use the `label` property, which creates the native text node. The screen puts the primary action above the latest observation, uses smaller panels, and keeps record details readable.
+
+Typechecking, all 15 tests, and Android/iOS/web bundles passed locally. Four new regression tests cover key application ordering, commit/rollback, failed begin, and invalid keys. These tests use a connection double; they do not constitute a physical-device SQLCipher integration test. Install the updated APK over the existing app and verify Start, screen-lock recording, Stop, and Export on the affected device. Do not clear app storage or uninstall to apply this fix.

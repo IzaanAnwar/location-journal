@@ -4,7 +4,7 @@ import { palette } from '../../theme';
 
 export function DevicePanel({ snapshot }: { snapshot: RecorderSnapshot }) {
   return <View style={styles.panel}>
-    <Text style={styles.title}>Recorded by this device</Text>
+    <Text style={styles.title}>Device & record history</Text>
     <View style={styles.row}><Text style={styles.label}>Device</Text><Text selectable style={styles.value}>{snapshot.model}</Text></View>
     <View style={styles.row}><Text style={styles.label}>System</Text><Text selectable style={styles.value}>{snapshot.os || 'Unavailable'}</Text></View>
     <View style={styles.row}><Text style={styles.label}>Signing key</Text><Text selectable style={styles.value}>{snapshot.keyId ? `${snapshot.keyId.slice(0, 8)} · ${snapshot.keyId.slice(-8)}` : 'Not available'}</Text></View>
@@ -17,11 +17,11 @@ export function DevicePanel({ snapshot }: { snapshot: RecorderSnapshot }) {
 }
 
 const styles = StyleSheet.create({
-  panel: { gap: 18, paddingHorizontal: 4 },
-  title: { fontSize: 17, fontWeight: '600', color: palette.ink, marginBottom: 2 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 24 },
+  panel: { gap: 14, paddingHorizontal: 0 },
+  title: { fontSize: 15, fontWeight: '600', color: palette.ink, marginBottom: 2 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 16 },
   label: { color: palette.muted, fontSize: 13, fontWeight: '400' },
   value: { color: palette.ink, fontSize: 13, flexShrink: 1, textAlign: 'right' },
-  counts: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, borderTopWidth: 1, borderColor: palette.line, paddingTop: 20 },
+  counts: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, borderTopWidth: 1, borderColor: palette.line, paddingTop: 16 },
   count: { fontSize: 17, color: palette.ink, fontWeight: '600', fontVariant: ['tabular-nums'] },
 });

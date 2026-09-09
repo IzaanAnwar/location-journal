@@ -5,7 +5,7 @@ import { palette } from '../../theme';
 export function ObservationPanel({ observation }: { observation: Observation | null }) {
   const accuracy = observation?.accuracy;
   return <View style={styles.panel}>
-    <Text style={styles.eyebrow}>LATEST OBSERVATION</Text>
+    <Text style={styles.eyebrow}>Latest location</Text>
     {observation ? <>
       <Text selectable style={styles.coordinate}>{Math.abs(observation.latitude).toFixed(6)}° <Text style={styles.direction}>{observation.latitude >= 0 ? 'N' : 'S'}</Text></Text>
       <Text selectable style={styles.coordinate}>{Math.abs(observation.longitude).toFixed(6)}° <Text style={styles.direction}>{observation.longitude >= 0 ? 'E' : 'W'}</Text></Text>
@@ -17,15 +17,15 @@ export function ObservationPanel({ observation }: { observation: Observation | n
       <Text selectable style={styles.note}>{new Date(observation.measuredAt).toISOString().slice(0, 10)} · Device-reported time</Text>
       {observation.mocked ? <Text style={styles.warning}>This reading is marked as simulated.</Text> : null}
     </> : <View style={styles.empty}>
-      <Text style={styles.emptyTitle}>Your next location starts here.</Text>
-      <Text style={styles.note}>Start recording to save this device’s location, time, and reported accuracy.</Text>
+      <Text style={styles.emptyTitle}>No locations recorded yet</Text>
+      <Text style={styles.note}>Start recording to save a location. New readings will appear here.</Text>
     </View>}
   </View>;
 }
 
 const styles = StyleSheet.create({
-  panel: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: 20, padding: 24, gap: 10 },
-  eyebrow: { color: palette.muted, fontSize: 11, fontWeight: '600', letterSpacing: 1.6, marginBottom: 12 },
+  panel: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: 12, padding: 18, gap: 10 },
+  eyebrow: { color: palette.muted, fontSize: 13, fontWeight: '500', marginBottom: 4 },
   coordinate: { color: palette.ink, fontSize: 32, fontWeight: '500', letterSpacing: -1, fontVariant: ['tabular-nums'] },
   direction: { color: palette.muted, fontSize: 22 },
   rule: { height: 1, backgroundColor: palette.line, marginVertical: 14 },
@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
   value: { color: palette.ink, fontSize: 17, fontWeight: '500', fontVariant: ['tabular-nums'] },
   note: { color: palette.muted, fontSize: 12, lineHeight: 19 },
   warning: { color: palette.warning, fontSize: 13 },
-  empty: { minHeight: 108, justifyContent: 'center', gap: 12 },
-  emptyTitle: { fontSize: 26, lineHeight: 33, fontWeight: '500', letterSpacing: -0.7, color: palette.ink, maxWidth: 240 },
+  empty: { minHeight: 64, justifyContent: 'center', gap: 12 },
+  emptyTitle: { fontSize: 18, lineHeight: 25, fontWeight: '500', color: palette.ink },
 });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Host, Button } from '@expo/ui';
+import { ActionButton } from './action-button';
 import { AppState, StyleSheet, Text, TextInput, View } from 'react-native';
 import { palette } from '../../theme';
 
@@ -32,7 +32,7 @@ export function PasscodeForm({ title, isSetup, onSubmit, onCancel }: Props) {
   };
   return <View style={styles.form}>
     <Text accessibilityRole="header" style={styles.title}>{title}</Text>
-    <Text style={styles.note}>{isSetup ? 'Use 6 to 12 digits. Keep it safe: there is no passcode recovery.' : 'Enter your passcode to authorize this action.'}</Text>
+    <Text style={styles.note}>{isSetup ? 'Use 6 to 12 digits. Keep it safe: there is no passcode recovery.' : 'Enter your passcode to continue.'}</Text>
     <Text style={styles.label}>Passcode</Text>
     <TextInput accessibilityLabel="Passcode" secureTextEntry keyboardType="number-pad" maxLength={12}
       autoComplete="off" value={passcode} onChangeText={setPasscode} editable={!isBusy} style={styles.input} />
@@ -40,14 +40,14 @@ export function PasscodeForm({ title, isSetup, onSubmit, onCancel }: Props) {
       secureTextEntry keyboardType="number-pad" maxLength={12} autoComplete="off" value={confirmation}
       onChangeText={setConfirmation} editable={!isBusy} style={styles.input} /></> : null}
     {error ? <Text selectable accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-    <Host matchContents seedColor={palette.accent} colorScheme="light"><Button disabled={isBusy} onPress={() => void submit()}>{isBusy ? 'Please wait…' : 'Confirm'}</Button></Host>
-    <Host matchContents seedColor={palette.accent} colorScheme="light"><Button disabled={isBusy} variant="text" onPress={onCancel}>Cancel</Button></Host>
+    <ActionButton label={isBusy ? 'Please wait…' : title} disabled={isBusy} onPress={() => void submit()} />
+    <ActionButton secondary label="Cancel" disabled={isBusy} onPress={onCancel} />
   </View>;
 }
 
 const styles = StyleSheet.create({
-  form: { padding: 22, gap: 12, backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: 20 },
-  title: { color: palette.ink, fontSize: 21, fontWeight: '600' },
+  form: { padding: 18, gap: 12, backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: 12 },
+  title: { color: palette.ink, fontSize: 20, fontWeight: '600' },
   note: { color: palette.muted, fontSize: 13, lineHeight: 20 },
   label: { color: palette.ink, fontSize: 13 },
   input: { minHeight: 50, borderWidth: 1, borderColor: palette.line, borderRadius: 10, paddingHorizontal: 16, fontSize: 22, color: palette.ink },
