@@ -37,3 +37,9 @@ The subsequent startup-crash report was audited against installed Expo UI 57.0.1
 Two render-contract regression tests cover pre-layout rendering, numeric native dimensions, and label preservation. Typechecking and Android/iOS bundle generation passed. The emulator installation was stopped at the user's request; no emulator or physical-phone reproduction is claimed. Install the new same-key APK over the existing app to check startup without deleting history.
 
 The user subsequently confirmed that the app starts on their Android phone after the numeric-width fix. This confirms that startup check only; background recording, export verification, and private-key installation still require their own checks.
+
+## Recording crash: persistent job permission
+
+The phone crash log reports `requested job be persisted without holding RECEIVE_BOOT_COMPLETED permission` inside Expo TaskManager's job scheduler after a location update. The installed TaskManager calls `setPersisted(true)`. Android permissions now explicitly include `android.permission.RECEIVE_BOOT_COMPLETED` through Expo configuration. CI parses the generated Android manifest and rejects builds missing this permission.
+
+Expo Android prebuild and the generated-manifest check passed locally, along with typechecking, all 17 tests, and Android/iOS production bundles. This requires a rebuilt APK. Recording on the affected phone and reboot behavior have not yet been validated; this permission alone does not establish uninterrupted recording across reboot.

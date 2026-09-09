@@ -17,6 +17,7 @@
     "android": {
       "package": "org.locationlog.app",
       "allowBackup": false,
+      "permissions": ["android.permission.RECEIVE_BOOT_COMPLETED"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/location-journal-icon.png",
         "backgroundColor": "#173F35"

@@ -51,6 +51,14 @@ jobs:
           NODE
       - name: Generate Android project
         run: npx expo prebuild --platform android --no-install
+      - name: Verify persistent location job permission
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          manifest = ET.parse('android/app/src/main/AndroidManifest.xml')
+          permissions = {entry.get('{http://schemas.android.com/apk/res/android}name') for entry in manifest.findall('uses-permission')}
+          assert 'android.permission.RECEIVE_BOOT_COMPLETED' in permissions, 'Expo persistent location jobs require RECEIVE_BOOT_COMPLETED'
+          PY
       - name: Build standalone APK
         working-directory: android
         run: ./gradlew :app:assembleRelease --no-daemon --max-workers=2 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
