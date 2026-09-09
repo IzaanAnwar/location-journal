@@ -4,16 +4,22 @@ This is an early test build. Start with disposable test recordings. Do not rely 
 
 ## Download without building anything
 
-1. Sign in to GitHub and open [Android test APK](https://github.com/IzaanAnwar/location-journal/actions/workflows/android-apk.yml).
-2. Choose a green, successful run for the `main` branch. Pull request builds are unreviewed contributor code.
-3. Scroll to **Artifacts** and download `location-journal-android-<commit>`.
-4. Extract the ZIP using your phone's Files app. It contains `location-journal-test.apk`, `SHA256SUMS.txt`, `COMMIT.txt`, the matching source archive, and license notices.
-5. Tap the APK. If Android asks, allow installation from that Files app or browser. Disable that permission again after installing. Keep Play Protect enabled.
-6. Open **Location Log** from your app list.
+1. Open [Releases](https://github.com/IzaanAnwar/location-journal/releases) and choose the newest Android test build.
+2. Under **Assets**, download **location-journal-test.apk** directly. No GitHub login or ZIP extraction is needed.
+3. Tap the downloaded APK. If Android asks, allow installation from that Files app or browser. Disable that permission again after installing. Keep Play Protect enabled.
+4. Open **Location Log** from your app list.
+
+Each release also includes `SHA256SUMS.txt`, `COMMIT.txt`, matching `source.tar.gz`, and license notices. Download those separately if you want to verify or inspect the build.
 
 No Expo account, Expo Go, development server, or USB connection is needed. GitHub builds the code; your recordings are not sent to GitHub. Internet is needed to download the APK, but the recorder does not depend on an application server.
 
-If no successful run exists yet, wait for the first build. A maintainer can select **Run workflow** to generate another APK. Downloads expire after 30 days. A red run means compilation or checks failed; there is no APK from that run.
+## Automatic release history
+
+Every successful push build on `main` publishes an experimental prerelease named `android-build-<run-id>`. The [Releases page](https://github.com/IzaanAnwar/location-journal/releases) maintains the full history automatically. Failed builds and pull requests never publish. Superseded builds may be cancelled before completion. Successful manual builds on main also publish.
+
+The publishing workflow verifies the source repository, workflow, branch, commit, event, and successful build result before downloading artifacts. It checks file hashes and publishes a draft only after all assets are uploaded. Existing published releases are preserved on retries. Release assets do not expire after 30 days like Actions artifacts do.
+
+Maintainers can use **Actions → Publish Android prerelease → Run workflow** with a successful main-branch build run ID to publish an earlier build while its artifact remains available. An interrupted draft must be inspected before retrying. No separate release credentials or Expo account are required.
 
 ## First recording
 

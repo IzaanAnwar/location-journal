@@ -6,11 +6,11 @@ A minimal Expo / React Native location recorder for Android and iOS. Records sta
 
 ## Install on your Android phone
 
-Open the [Android test APK builds](https://github.com/IzaanAnwar/location-journal/actions/workflows/android-apk.yml), choose a successful run on **main**, and download its artifact under **Artifacts**. Sign in to GitHub to download. Extract the ZIP and open `location-journal-test.apk` on your phone.
+Open [Releases and download history](https://github.com/IzaanAnwar/location-journal/releases), choose the newest Android test build, and download **location-journal-test.apk** under **Assets**. Open the APK on your phone. No GitHub account or ZIP extraction is needed.
 
 Follow the [Android installation and testing guide](docs/android-install.md) for permissions, first recording, updates, and local builds. The installed app is currently named **Location Log**. The APK includes its JavaScript bundle and does not need Expo Go, Metro, an Expo account, or a connected computer.
 
-Builds are for testing and use the Expo template's public debug signing key. They are not production-signed releases. Artifacts expire after 30 days; a maintainer can rerun the workflow. A failed build has no downloadable APK.
+Builds are for testing and use the Expo template's public debug signing key. They are not production-signed releases. Each successful push build on `main` automatically publishes a prerelease with the APK, matching source, checksums, and build notes. The Releases page is the automatically maintained release history. Release downloads do not use Actions’ 30-day artifact expiry. Failed and pull-request builds do not publish releases.
 
 ## Implemented
 
