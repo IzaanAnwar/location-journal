@@ -29,3 +29,9 @@ The Android 13 report showed `file is not a database` when starting a session, a
 Expo UI's Android button implementation renders raw children directly into Compose. All recorder buttons now use the `label` property, which creates the native text node. The screen puts the primary action above the latest observation, uses smaller panels, and keeps record details readable.
 
 Typechecking, all 15 tests, and Android/iOS/web bundles passed locally. Four new regression tests cover key application ordering, commit/rollback, failed begin, and invalid keys. These tests use a connection double; they do not constitute a physical-device SQLCipher integration test. Install the updated APK over the existing app and verify Start, screen-lock recording, Stop, and Export on the affected device. Do not clear app storage or uninstall to apply this fix.
+
+## Startup crash audit
+
+The subsequent startup-crash report was audited against installed Expo UI 57.0.17. The universal Android style transformer forwards width/height to a native `size` modifier; the modifier expects numeric fields. The recorder button passed `width: '100%'`, which can fail native field conversion as soon as the screen renders. The button now waits for React Native layout and passes measured numeric dimensions to Expo UI, keeping its explicit `label` property.
+
+Two render-contract regression tests cover pre-layout rendering, numeric native dimensions, and label preservation. Typechecking and Android/iOS bundle generation passed. The emulator installation was stopped at the user's request; no emulator or physical-phone reproduction is claimed. Install the new same-key APK over the existing app to check startup without deleting history.
