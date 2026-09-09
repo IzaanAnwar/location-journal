@@ -19,7 +19,7 @@ Passcode verification authorizes app actions. The native signing API is not pass
 - App error signals live separately so a failed database can still be reported. These signals are not signed evidence.
 - Export is deliberately plaintext for interoperability, only after passcode authorization. The share destination receives exact locations. The file is removed when sharing completes. A crash can leave a file in app cache until the next screen initialization, when the app removes its interrupted exports.
 - No application location uploads exist. The OS, Google/Apple location services, carrier, development tooling, or a recipient selected in the share sheet may have independent data practices.
-- Requested 10-second updates are not delivery guarantees. iOS may batch, and vendor battery management may terminate Android tasks.
+- Requested hourly Android updates are not delivery guarantees. Expo’s time interval applies only to Android; iOS delivery remains managed by the OS. iOS may batch, and vendor battery management may terminate Android tasks.
 
 ## Dependency review
 

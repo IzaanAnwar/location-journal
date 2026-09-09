@@ -5,6 +5,7 @@ import { authorize } from '../security/passcode';
 import { appendRecord, checkLocalCheckpoint, getIdentity } from '../evidence/ledger';
 import { readMetadata, writeMetadata } from '../storage/database';
 import { LOCATION_TASK } from './background-task';
+import { REQUESTED_INTERVAL_MS } from './schedule';
 
 let isChanging = false;
 
@@ -29,16 +30,16 @@ async function startRecording(): Promise<void> {
   if (await readMetadata('recording') === 'true' && await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK)) return;
   await appendRecord('session-start', { device: Device.modelName, manufacturer: Device.manufacturer,
     os: Device.osName, osVersion: Device.osVersion, appVersion: Application.nativeApplicationVersion,
-    build: Application.nativeBuildVersion, requestedIntervalMs: 10_000,
+    build: Application.nativeBuildVersion, requestedIntervalMs: process.env.EXPO_OS === 'android' ? REQUESTED_INTERVAL_MS : null,
     permission: background.status, timeSource: 'device-clock-untrusted' });
   await writeMetadata('recording', 'true');
   try {
     await Location.startLocationUpdatesAsync(LOCATION_TASK, {
-      accuracy: Location.Accuracy.Highest, timeInterval: 10_000, distanceInterval: 0,
+      accuracy: Location.Accuracy.Highest, timeInterval: REQUESTED_INTERVAL_MS, distanceInterval: 0,
       deferredUpdatesInterval: 0, pausesUpdatesAutomatically: false,
       showsBackgroundLocationIndicator: true,
       foregroundService: { notificationTitle: 'Location Log is recording',
-        notificationBody: 'Your location is saved privately on this device.', killServiceOnDestroy: false },
+        notificationBody: 'Hourly location requests. Saved privately on this device.', killServiceOnDestroy: false },
     });
   } catch (error) {
     await writeMetadata('recording', 'false');

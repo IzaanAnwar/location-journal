@@ -8,13 +8,14 @@ import { DevicePanel } from './device-panel';
 import { PasscodeForm } from './passcode-form';
 import { ActionButton } from './action-button';
 import { palette } from '../../theme';
+import { READING_OVERDUE_MS } from '../../recording/schedule';
 
 export function RecorderScreen() {
   const { snapshot, error, refresh } = useRecorder();
   const [action, setAction] = useState<RecorderAction | null>(null);
   const insets = useSafeAreaInsets();
   const isPreview = process.env.EXPO_OS === 'web';
-  const isStale = snapshot.isRecording && (!snapshot.latest || Date.now() - snapshot.latest.measuredAt > 120_000);
+  const isStale = snapshot.isRecording && (!snapshot.latest || Date.now() - snapshot.latest.measuredAt > (process.env.EXPO_OS === 'android' ? READING_OVERDUE_MS : 120_000));
   const attention = snapshot.needsAttention || Boolean(error || snapshot.error) || isStale;
   const status = isPreview ? 'Preview' : attention ? 'Needs attention' : !snapshot.isReady ? 'Opening journal' : snapshot.isRecording ? 'Recording' : 'Not recording';
   const mainAction = !snapshot.hasPasscode ? 'setup' : snapshot.isRecording && !snapshot.needsAttention ? 'stop' : 'start';
@@ -32,7 +33,7 @@ export function RecorderScreen() {
         <View style={styles.statusRow}><View style={[styles.dot, { backgroundColor: attention ? palette.warning : snapshot.isRecording ? palette.accent : palette.muted }]} />
           <Text style={styles.statusLabel}>{isPreview ? 'Read-only web preview' : 'On-device location journal'}</Text></View>
         <Text accessibilityRole="header" style={styles.heading}>{status}</Text>
-        <Text style={styles.subtitle}>{snapshot.isRecording ? 'Recording this phone’s location in the background.' : 'Location, time and accuracy. Stored on this phone.'}</Text>
+        <Text style={styles.subtitle}>{snapshot.isRecording ? 'Background recording enabled. Android requests a reading each hour.' : 'Location, time and accuracy. Stored on this phone.'}</Text>
       </View>
       {error || snapshot.error ? <View style={styles.notice}><Text selectable accessibilityRole="alert" style={styles.error}>{error || snapshot.error}</Text></View> : null}
       {snapshot.needsAttention ? <Text style={styles.error}>Background recording stopped. Use your passcode to restart.</Text> : null}

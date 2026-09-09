@@ -75,3 +75,11 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUC
 The full license is in [LICENSE](LICENSE). Original starter attribution is preserved in [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES).
 
 Release tags use `v<major>.<minor>.<patch>-alpha.<build-number>`, for example `v0.1.1-alpha.12`. The APK uses the same version. CI increments the alpha build number and Android version code automatically; maintainers update the base version in `app.json`. Older public-debug-key releases retain their original names for traceability.
+
+### Hourly Android recording
+
+Android requests the highest available location accuracy once per hour while recording, using a foreground service with a visible notification. After updating from a faster recording version, stop and start recording with your passcode to apply the new interval. iOS does not support Expo's Android time interval setting.
+
+Screen-off/background recording is supported, but force-stop, shutdown, revoked permissions, or manufacturer battery controls can stop delivery. On Xiaomi, allow background location, enable background autostart if offered, and select unrestricted battery use for the app. Verify several hours of actual readings on your phone; these settings cannot guarantee delivery. Reopen the app after reboot and check recording status.
+
+An hourly reading describes one observed moment, not the intervening hour. The journal still records separations over two minutes as unobserved gaps; it never fills them with assumed locations. Android's overdue warning allows one hour plus five minutes, without changing evidence timestamps or gap records. Signatures detect certain changes to saved data; they do not certify GPS accuracy, trustworthy device time, or legal admissibility.
