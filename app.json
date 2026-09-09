@@ -16,7 +16,11 @@
     },
     "android": {
       "package": "org.locationlog.app",
-      "allowBackup": false
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/location-journal-icon.png",
+        "backgroundColor": "#173F35"
+      }
     },
     "plugins": [
       "expo-router",
@@ -41,7 +45,9 @@
       "expo-sharing"
     ],
     "web": {
-      "bundler": "metro"
-    }
+      "bundler": "metro",
+      "favicon": "./assets/location-journal-icon.png"
+    },
+    "icon": "./assets/location-journal-icon.png"
   }
 }

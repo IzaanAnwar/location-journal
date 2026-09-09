@@ -1,5 +1,7 @@
 # Location Journal
 
+<img src="assets/location-journal-icon.png" alt="Location Journal: a journal with a location marker" width="128" height="128" />
+
 A minimal Expo / React Native location recorder for Android and iOS. Records stay on the device unless the user explicitly exports them. There are no accounts, analytics SDKs, map requests, or application-operated location servers.
 
 **Development build, not a validated forensic instrument.** Do not rely on this version as your sole source of evidence. Signatures establish integrity relative to a key, not location truth, personal presence, trusted measurement time, complete history, or legal admissibility.
