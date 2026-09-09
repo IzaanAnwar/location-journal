@@ -1,0 +1,58 @@
+name: Android test APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: npm ci --include=dev
+      - run: npm run typecheck
+      - run: npm test
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --no-install
+      - name: Build standalone test APK
+        working-directory: android
+        run: ./gradlew :app:assembleRelease --no-daemon --max-workers=2 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+      - name: Package APK and matching source
+        run: |
+          mkdir -p apk-download
+          cp android/app/build/outputs/apk/release/app-release.apk apk-download/location-journal-test.apk
+          git archive --format=tar.gz --output=apk-download/source.tar.gz HEAD
+          cp LICENSE THIRD-PARTY-NOTICES apk-download/
+          printf '%s\n' "$GITHUB_SHA" > apk-download/COMMIT.txt
+          cd apk-download
+          sha256sum location-journal-test.apk source.tar.gz > SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: location-journal-android-${{ github.sha }}
+          path: apk-download/
+          if-no-files-found: error
+          retention-days: 30
