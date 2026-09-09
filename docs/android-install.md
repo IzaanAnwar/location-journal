@@ -4,8 +4,8 @@ This is an early test build. Start with disposable test recordings. Do not rely 
 
 ## Download without building anything
 
-1. Open [Releases](https://github.com/IzaanAnwar/location-journal/releases) and choose the newest Android test build.
-2. Under **Assets**, download **location-journal-test.apk** directly. No GitHub login or ZIP extraction is needed.
+1. Open [Releases](https://github.com/IzaanAnwar/location-journal/releases) and choose the newest Android alpha build.
+2. Under **Assets**, download **location-journal-<version>.apk** directly. No GitHub login or ZIP extraction is needed.
 3. Tap the downloaded APK. If Android asks, allow installation from that Files app or browser. Disable that permission again after installing. Keep Play Protect enabled.
 4. Open **Location Log** from your app list.
 
@@ -15,7 +15,7 @@ No Expo account, Expo Go, development server, or USB connection is needed. GitHu
 
 ## Automatic release history
 
-Every successful push build on `main` publishes an experimental prerelease named `android-build-<run-id>`. The [Releases page](https://github.com/IzaanAnwar/location-journal/releases) maintains the full history automatically. Failed builds and pull requests never publish. Superseded builds may be cancelled before completion. Successful manual builds on main also publish.
+Every successful push build on `main` publishes an experimental prerelease named `v0.1.1-alpha.<build-number>`. The [Releases page](https://github.com/IzaanAnwar/location-journal/releases) maintains the full history automatically. Failed builds and pull requests never publish. Superseded builds may be cancelled before completion. Successful manual builds on main also publish.
 
 The publishing workflow verifies the source repository, workflow, branch, commit, event, and successful build result before downloading artifacts. It checks file hashes and publishes a draft only after all assets are uploaded. Existing published releases are preserved on retries. Release assets do not expire after 30 days like Actions artifacts do.
 
@@ -47,13 +47,15 @@ This checks the signed record chain and prints the exported file's SHA-256. It d
 
 On Linux, you can check the downloaded APK against its accompanying checksum with `sha256sum -c SHA256SUMS.txt`. On macOS use `shasum -a 256 -c SHA256SUMS.txt`. This detects a mismatched file; the checksum is not independent certification of the build.
 
-## Updating and test signing
+## Updating and release signing
 
-The workflow builds the release variant with bundled JavaScript, signed with the Expo template's public debug key. This avoids requiring private signing credentials for initial testing. Anyone with that key could sign a replacement application, so these builds are unsuitable for sensitive production use.
+Main-branch APKs use the private Location Journal release key, supplied through repository Actions secrets. Pull-request builds never receive the key and cannot publish releases. Private signing establishes the app update identity; it does not establish location truth or legal admissibility.
 
-Install later APKs over the existing app when Android permits. If it reports a signing conflict, export records before considering uninstalling. **Uninstalling or clearing app storage can destroy the database and keys.** Exported files cannot be imported back into the app. Production signing must be established before relying on retained history across releases.
+The old `location-journal-test.apk` releases used Expo's public debug key. Android will reject an update from that key to the new private key. Export and verify any records before choosing to uninstall the old app. Uninstalling deletes the local database and device keys; exported histories cannot be imported into the app. Keep the old installation if you still need access to its history.
 
-## Build the same test APK locally
+Once on the private-key version, future APKs signed with that same key can update it normally.
+
+## Build a local debug-signed APK
 
 Install Node 24, Java 17, and Android Studio with its SDK and command-line tools. Set `ANDROID_HOME` to your SDK directory and accept SDK licenses using Android's SDK manager. The build uses the Android versions selected by Expo SDK 57.
 
@@ -68,7 +70,7 @@ cd android
 ./gradlew :app:assembleRelease --no-daemon --max-workers=2 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 ```
 
-The APK is `android/app/build/outputs/apk/release/app-release.apk` relative to the repository root. For a USB-connected phone with USB debugging enabled:
+Local builds use Expo’s debug key, not the private release key. The APK is `android/app/build/outputs/apk/release/app-release.apk` relative to the repository root. For a USB-connected phone with USB debugging enabled:
 
 ```sh
 adb install -r app/build/outputs/apk/release/app-release.apk

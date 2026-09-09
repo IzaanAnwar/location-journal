@@ -1,4 +1,4 @@
-name: Android test APK
+name: Android APK
 
 on:
   push:
@@ -36,20 +36,53 @@ jobs:
       - run: npm ci --include=dev
       - run: npm run typecheck
       - run: npm test
+      - name: Set Android release version
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          const number = Number(process.env.GITHUB_RUN_NUMBER);
+          if (!Number.isSafeInteger(number) || number < 1 || number >= 2100000000) throw new Error('Invalid Android version code');
+          const version = `${app.expo.version}-alpha.${number}`;
+          app.expo.version = version;
+          app.expo.android.versionCode = number;
+          fs.writeFileSync('app.json', JSON.stringify(app, null, 2));
+          fs.appendFileSync(process.env.GITHUB_ENV, `RELEASE_VERSION=${version}\n`);
+          NODE
       - name: Generate Android project
         run: npx expo prebuild --platform android --no-install
-      - name: Build standalone test APK
+      - name: Build standalone APK
         working-directory: android
         run: ./gradlew :app:assembleRelease --no-daemon --max-workers=2 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+      - name: Sign trusted main build with private release key
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          RELEASE_KEYSTORE: ${{ secrets.ANDROID_RELEASE_KEYSTORE }}
+          RELEASE_PASSWORD: ${{ secrets.ANDROID_RELEASE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$RELEASE_KEYSTORE"
+          test -n "$RELEASE_PASSWORD"
+          signing_dir=$(mktemp -d "$RUNNER_TEMP/location-signing.XXXXXX")
+          trap 'rm -rf "$signing_dir"' EXIT
+          printf '%s' "$RELEASE_KEYSTORE" | base64 --decode > "$signing_dir/release.p12"
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          test -n "$apksigner"
+          "$apksigner" sign --ks "$signing_dir/release.p12" --ks-type PKCS12 \
+            --ks-key-alias location-journal --ks-pass env:RELEASE_PASSWORD --key-pass env:RELEASE_PASSWORD \
+            --out "$signing_dir/location-journal.apk" android/app/build/outputs/apk/release/app-release.apk
+          "$apksigner" verify --verbose --print-certs "$signing_dir/location-journal.apk"
+          cp "$signing_dir/location-journal.apk" android/app/build/outputs/apk/release/app-release.apk
       - name: Package APK and matching source
         run: |
           mkdir -p apk-download
-          cp android/app/build/outputs/apk/release/app-release.apk apk-download/location-journal-test.apk
+          cp android/app/build/outputs/apk/release/app-release.apk "apk-download/location-journal-$RELEASE_VERSION.apk"
           git archive --format=tar.gz --output=apk-download/source.tar.gz HEAD
           cp LICENSE THIRD-PARTY-NOTICES apk-download/
           printf '%s\n' "$GITHUB_SHA" > apk-download/COMMIT.txt
           cd apk-download
-          sha256sum location-journal-test.apk source.tar.gz > SHA256SUMS.txt
+          sha256sum "location-journal-$RELEASE_VERSION.apk" source.tar.gz > SHA256SUMS.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: location-journal-android-${{ github.sha }}

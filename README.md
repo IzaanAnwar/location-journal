@@ -8,11 +8,11 @@ A minimal Expo / React Native location recorder for Android and iOS. Records sta
 
 ## Install on your Android phone
 
-Open [Releases and download history](https://github.com/IzaanAnwar/location-journal/releases), choose the newest Android test build, and download **location-journal-test.apk** under **Assets**. Open the APK on your phone. No GitHub account or ZIP extraction is needed.
+Open [Releases and download history](https://github.com/IzaanAnwar/location-journal/releases), choose the newest Android alpha build, and download **location-journal-<version>.apk** under **Assets**. Open the APK on your phone. No GitHub account or ZIP extraction is needed.
 
 Follow the [Android installation and testing guide](docs/android-install.md) for permissions, first recording, updates, and local builds. The installed app is currently named **Location Log**. The APK includes its JavaScript bundle and does not need Expo Go, Metro, an Expo account, or a connected computer.
 
-Builds are for testing and use the Expo template's public debug signing key. They are not production-signed releases. Each successful push build on `main` automatically publishes a prerelease with the APK, matching source, checksums, and build notes. The Releases page is the automatically maintained release history. Release downloads do not use Actions’ 30-day artifact expiry. Failed and pull-request builds do not publish releases.
+Main-branch releases use a private Android release signing key. They remain alpha releases while physical-device validation continues. Older debug-signed installs cannot be updated with this key; export records before uninstalling the old app. Each successful push build on `main` automatically publishes a prerelease with the APK, matching source, checksums, and build notes. The Releases page is the automatically maintained release history. Release downloads do not use Actions’ 30-day artifact expiry. Failed and pull-request builds do not publish releases.
 
 ## Implemented
 
@@ -73,3 +73,5 @@ GPL-3.0-only for project code. Redistribution of covered derivatives must comply
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). Use [issues](https://github.com/IzaanAnwar/location-journal/issues) for bugs and focused proposals. Follow [SECURITY.md](SECURITY.md) for private vulnerability reporting. Never post real location records in public issues.
 
 The full license is in [LICENSE](LICENSE). Original starter attribution is preserved in [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES).
+
+Release tags use `v<major>.<minor>.<patch>-alpha.<build-number>`, for example `v0.1.1-alpha.12`. The APK uses the same version. CI increments the alpha build number and Android version code automatically; maintainers update the base version in `app.json`. Older public-debug-key releases retain their original names for traceability.

@@ -2,13 +2,13 @@ name: Publish Android prerelease
 
 on:
   workflow_run:
-    workflows: [Android test APK]
+    workflows: [Android APK]
     types: [completed]
     branches: [main]
   workflow_dispatch:
     inputs:
       build_run_id:
-        description: Successful Android test APK run ID from main
+        description: Successful Android APK run ID from main
         required: true
         type: string
 
@@ -43,16 +43,22 @@ jobs:
           const run = JSON.parse(fs.readFileSync('build-run.json', 'utf8'));
           if (run.status !== 'completed' || run.conclusion !== 'success' ||
               run.head_branch !== 'main' || run.head_repository?.full_name !== process.env.GH_REPO ||
-              run.path !== '.github/workflows/android-apk.yml' ||
+              run.path !== '.github/workflows/android-apk.yml' || run.name !== 'Android APK' ||
               !['push', 'workflow_dispatch'].includes(run.event) ||
               !/^[a-f0-9]{40}$/.test(run.head_sha)) {
             throw new Error('Only successful Android APK builds from this repository main branch may publish.');
           }
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `sha=${run.head_sha}\ntag=android-build-${run.id}\n`);
+          const { execFileSync } = require('node:child_process');
+          const response = JSON.parse(execFileSync('gh', ['api', `repos/${process.env.GH_REPO}/contents/app.json?ref=${run.head_sha}`], { encoding: 'utf8' }));
+          const app = JSON.parse(Buffer.from(response.content, 'base64').toString('utf8'));
+          if (!/^\d+\.\d+\.\d+$/.test(app.expo.version) || !Number.isSafeInteger(run.run_number) || run.run_number < 1) throw new Error('Invalid release version');
+          const version = `${app.expo.version}-alpha.${run.run_number}`;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `sha=${run.head_sha}\ntag=v${version}\nversion=${version}\n`);
           NODE
       - name: Check for an existing release
         id: existing
         env:
+          RELEASE_VERSION: ${{ steps.build.outputs.version }}
           RELEASE_TAG: ${{ steps.build.outputs.tag }}
         run: |
           if gh release view "$RELEASE_TAG" --json isDraft > existing-release.json; then
@@ -71,22 +77,23 @@ jobs:
       - name: Publish APK with matching source and checksums
         if: steps.existing.outputs.published != 'true'
         env:
+          RELEASE_VERSION: ${{ steps.build.outputs.version }}
           RELEASE_TAG: ${{ steps.build.outputs.tag }}
           BUILD_SHA: ${{ steps.build.outputs.sha }}
         run: |
           cat > release-notes.md <<EOF_NOTES
           ## Install on Android
-          Download **location-journal-test.apk** under Assets and open it on your phone. No GitHub login, Expo Go, or development server is needed.
+          Download **location-journal-$RELEASE_VERSION.apk** under Assets and open it on your phone. No GitHub login, Expo Go, or development server is needed.
 
           [Installation and testing guide](https://github.com/$GH_REPO/blob/$BUILD_SHA/docs/android-install.md) · [Build log](https://github.com/$GH_REPO/actions/runs/$BUILD_RUN_ID)
 
-          Experimental test build using the public Expo debug signing key. Native compilation passed; physical-device reliability and legal admissibility are not established. Export records before any uninstall or storage reset.
+          Early release signed with the private Location Journal release key. This cannot update an older debug-signed installation; export records before uninstalling that older app. Native compilation passed; physical-device reliability and legal admissibility are not established. Export records before any uninstall or storage reset.
 
           Built from commit $BUILD_SHA. Matching source, license notices, and SHA-256 checksums are attached. The APK signing key is separate from each device's location-record signing key.
           EOF_NOTES
           gh release create "$RELEASE_TAG" --target "$BUILD_SHA" --draft --prerelease \
-            --title "Android test build $BUILD_RUN_ID" --notes-file release-notes.md --generate-notes \
-            release-files/location-journal-test.apk release-files/source.tar.gz \
+            --title "Location Journal $RELEASE_VERSION" --notes-file release-notes.md --generate-notes \
+            "release-files/location-journal-$RELEASE_VERSION.apk" release-files/source.tar.gz \
             release-files/SHA256SUMS.txt release-files/COMMIT.txt \
             release-files/LICENSE release-files/THIRD-PARTY-NOTICES
           gh release edit "$RELEASE_TAG" --draft=false

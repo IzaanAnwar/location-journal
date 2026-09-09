@@ -35,3 +35,5 @@ Typechecking, all 15 tests, and Android/iOS/web bundles passed locally. Four new
 The subsequent startup-crash report was audited against installed Expo UI 57.0.17. The universal Android style transformer forwards width/height to a native `size` modifier; the modifier expects numeric fields. The recorder button passed `width: '100%'`, which can fail native field conversion as soon as the screen renders. The button now waits for React Native layout and passes measured numeric dimensions to Expo UI, keeping its explicit `label` property.
 
 Two render-contract regression tests cover pre-layout rendering, numeric native dimensions, and label preservation. Typechecking and Android/iOS bundle generation passed. The emulator installation was stopped at the user's request; no emulator or physical-phone reproduction is claimed. Install the new same-key APK over the existing app to check startup without deleting history.
+
+The user subsequently confirmed that the app starts on their Android phone after the numeric-width fix. This confirms that startup check only; background recording, export verification, and private-key installation still require their own checks.

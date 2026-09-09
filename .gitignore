@@ -54,3 +54,6 @@ yarn-error.*
 *.sqlite-*
 *.jsonl
 apk-download/
+
+# Local release-signing backup; never commit or share
+.release-signing/

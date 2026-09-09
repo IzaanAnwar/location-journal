@@ -2,7 +2,7 @@
   "expo": {
     "name": "Location Log",
     "slug": "location-log",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "orientation": "portrait",
     "scheme": "locationlog",
     "userInterfaceStyle": "light",
