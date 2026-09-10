@@ -21,7 +21,7 @@ export interface RecordBody {
   recordedAt: number;
   uptimeMs: number;
   runtimeId: string;
-  kind: 'session-start' | 'session-stop' | 'location' | 'interruption' | 'error';
+  kind: 'session-start' | 'session-stop' | 'location' | 'interruption' | 'configuration' | 'error';
   payload: Record<string, unknown>;
 }
 

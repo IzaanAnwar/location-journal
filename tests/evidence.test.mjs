@@ -9,7 +9,7 @@ import { createEvidenceVerifier } from '../scripts/evidence-verifier.mjs';
 import { encodeRecord, validateObservation } from '../src/evidence/record.ts';
 
 const hash = text => createHash('sha256').update(text).digest('hex');
-function fixture(payload = {}) {
+function fixture(payload = {}, kind = 'session-start') {
   const { publicKey, privateKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
   const jwk = publicKey.export({ format: 'jwk' });
   const publicKeyHex = '04' + Buffer.from(jwk.x, 'base64url').toString('hex') + Buffer.from(jwk.y, 'base64url').toString('hex');
@@ -17,7 +17,7 @@ function fixture(payload = {}) {
   let previousHash = '0'.repeat(64);
   const records = [1, 2, 3].map(sequence => {
     const body = encodeRecord({ format: 'location-log/v1', sequence, previousHash, keyId: identity.keyId,
-      recordedAt: 1_800_000_000_000 + sequence, uptimeMs: sequence * 1000, runtimeId: 'test', kind: 'session-start', payload });
+      recordedAt: 1_800_000_000_000 + sequence, uptimeMs: sequence * 1000, runtimeId: 'test', kind, payload });
     const record = { type: 'record', body, hash: hash(body), signature: sign('sha256', Buffer.from(body), privateKey).toString('hex') };
     previousHash = record.hash;
     return record;
@@ -31,6 +31,12 @@ test('valid P-256 records verify without claiming independent time', () => {
   records.forEach(record => verifier.accept(record));
   assert.equal(verifier.finish().records, 3);
   assert.equal(verifier.finish().independentlyTimestamped, false);
+});
+test('signed configuration changes verify as journal events', () => {
+  const { records, header } = fixture({ requestedIntervalMs: 3_600_000 }, 'configuration');
+  const verifier = createEvidenceVerifier(header);
+  records.forEach(record => verifier.accept(record));
+  assert.equal(verifier.finish().records, 3);
 });
 test('changed coordinates with recomputed hash cannot reuse a signature', () => {
   const { records, header } = fixture();

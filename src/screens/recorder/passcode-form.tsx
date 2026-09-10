@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActionButton } from './action-button';
 import { AppState, StyleSheet, Text, TextInput, View } from 'react-native';
-import { palette } from '../../theme';
+import { fonts, usePalette, type Palette } from '../../theme';
 
 interface Props {
   title: string;
@@ -11,6 +11,7 @@ interface Props {
 }
 
 export function PasscodeForm({ title, isSetup, onSubmit, onCancel }: Props) {
+  const styles = createStyles(usePalette());
   const [passcode, setPasscode] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [isBusy, setBusy] = useState(false);
@@ -45,11 +46,11 @@ export function PasscodeForm({ title, isSetup, onSubmit, onCancel }: Props) {
   </View>;
 }
 
-const styles = StyleSheet.create({
-  form: { padding: 18, gap: 12, backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: 12 },
-  title: { color: palette.ink, fontSize: 20, fontWeight: '600' },
-  note: { color: palette.muted, fontSize: 13, lineHeight: 20 },
+const createStyles = (palette: Palette) => StyleSheet.create({
+  form: { padding: 18, gap: 12, backgroundColor: palette.surface, borderRadius: 24 },
+  title: { color: palette.ink, fontSize: 20, fontFamily: fonts.semibold },
+  note: { color: palette.muted, fontSize: 13, fontFamily: fonts.regular, lineHeight: 20 },
   label: { color: palette.ink, fontSize: 13 },
   input: { minHeight: 50, borderWidth: 1, borderColor: palette.line, borderRadius: 10, paddingHorizontal: 16, fontSize: 22, color: palette.ink },
-  error: { color: palette.warning, fontSize: 13, lineHeight: 19 },
+  error: { color: palette.warning, fontSize: 13, fontFamily: fonts.regular, lineHeight: 19 },
 });

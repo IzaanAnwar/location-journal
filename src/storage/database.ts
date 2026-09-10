@@ -48,6 +48,17 @@ export async function writeMetadata(key: string, value: string): Promise<void> {
   await database.runAsync('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)', key, value);
 }
 
+/** Keeps timestamp metadata monotonic when independently scheduled location jobs overlap. */
+export async function writeMetadataAtLeast(key: string, value: number): Promise<void> {
+  if (!Number.isFinite(value) || value < 0) throw new Error('Metadata timestamp is invalid.');
+  const database = await getDatabase();
+  const serialized = String(value);
+  await database.runAsync(`INSERT INTO metadata (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = CASE
+      WHEN CAST(metadata.value AS REAL) >= CAST(excluded.value AS REAL) THEN metadata.value
+      ELSE excluded.value END`, key, serialized);
+}
+
 /** Opens a fresh connection with the same encryption key for an isolated writer. */
 export async function withEncryptedWrite<T>(operation: (transaction: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {
   await getDatabase();

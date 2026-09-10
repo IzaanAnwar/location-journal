@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AppState } from 'react-native';
+import { reconcileActiveRecordingSchedule } from './recorder';
 import { emptySnapshot, getSnapshot, type RecorderSnapshot } from './snapshot';
 
 export function useRecorder() {
@@ -22,9 +23,17 @@ export function useRecorder() {
         if (isMounted) setError(failure instanceof Error ? failure.message : 'Cannot open the recording store.');
       } finally { isRefreshing = false; }
     };
-    void update();
+    const resume = async () => {
+      try { await reconcileActiveRecordingSchedule('app-resume'); }
+      catch (failure) {
+        if (isMounted) setError(failure instanceof Error ? failure.message : 'Cannot update recording interval.');
+        return;
+      }
+      await update();
+    };
+    void resume();
     const interval = setInterval(() => void update(), 5_000);
-    const listener = AppState.addEventListener('change', state => { if (state === 'active') void update(); });
+    const listener = AppState.addEventListener('change', state => { if (state === 'active') void resume(); });
     return () => { isMounted = false; clearInterval(interval); listener.remove(); };
   }, []);
   return { snapshot, error, refresh };

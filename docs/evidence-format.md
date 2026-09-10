@@ -31,7 +31,7 @@ The location source is labelled `os-location-service`. There is no claim that al
 
 ## Events and gaps
 
-`session-start`, `session-stop`, `location`, `interruption`, and `error` are supported. A gap event describes a separation over 120 seconds between observed measurement times. It does not establish a cause, or count every missing fix. Deliberate stops also create coverage gaps; their session events remain in the history. There is no evidence of a location during an interval with no observation.
+`session-start`, `session-stop`, `location`, `interruption`, `configuration`, and `error` are supported. A `configuration` event records a successfully applied recording-option change, such as an update from a legacy 10-second Android request to the hourly request. It is an app receipt of the native registration call, not proof that the OS delivered readings at that cadence. A gap event describes a separation over 120 seconds between observed measurement times. It does not establish a cause, or count every missing fix. Deliberate stops also create coverage gaps; their session events remain in the history. There is no evidence of a location during an interval with no observation.
 
 ## Indian evidence preparation
 

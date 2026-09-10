@@ -1,40 +1,59 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { Observation } from '../../evidence/record';
-import { palette } from '../../theme';
+import { fonts, usePalette, type Palette } from '../../theme';
+import { PlaceLookup } from './place-lookup';
+import { formatMeasurementTime } from './measurement-time';
 
 export function ObservationPanel({ observation }: { observation: Observation | null }) {
+  const styles = createStyles(usePalette());
+  const time = observation ? formatMeasurementTime(observation.measuredAt) : null;
   const accuracy = observation?.accuracy;
-  return <View style={styles.panel}>
-    <Text style={styles.eyebrow}>Latest location</Text>
-    {observation ? <>
-      <Text selectable style={styles.coordinate}>{Math.abs(observation.latitude).toFixed(6)}° <Text style={styles.direction}>{observation.latitude >= 0 ? 'N' : 'S'}</Text></Text>
-      <Text selectable style={styles.coordinate}>{Math.abs(observation.longitude).toFixed(6)}° <Text style={styles.direction}>{observation.longitude >= 0 ? 'E' : 'W'}</Text></Text>
-      <View style={styles.rule} />
-      <View style={styles.row}>
-        <View style={styles.metric}><Text style={styles.label}>Reported accuracy</Text><Text selectable style={styles.value}>{accuracy != null && accuracy >= 0 ? `${accuracy.toFixed(1)} m` : 'Unavailable'}</Text></View>
-        <View style={styles.metric}><Text style={styles.label}>Measured at · UTC</Text><Text selectable style={styles.value}>{new Date(observation.measuredAt).toISOString().slice(11, 19)}</Text></View>
+  return <View style={styles.shell}><View style={styles.panel}>
+    <Text style={styles.label}>Latest observation</Text>
+    {observation && time ? <>
+      <View style={styles.timeBlock}>
+        <Text selectable style={styles.time}>{time.local}</Text>
+        <Text selectable style={styles.date}>{time.localDate}</Text>
+        <Text selectable style={styles.label}>{time.timeZone} • Your current time zone</Text>
       </View>
-      <Text selectable style={styles.note}>{new Date(observation.measuredAt).toISOString().slice(0, 10)} · Device-reported time</Text>
-      {observation.mocked ? <Text style={styles.warning}>This reading is marked as simulated.</Text> : null}
+      <View style={styles.coordinates}>
+        <View style={styles.coordinateBlock}><Text style={styles.label}>Latitude</Text>
+          <Text selectable style={styles.coordinate}>{Math.abs(observation.latitude).toFixed(6)}° {observation.latitude >= 0 ? 'N' : 'S'}</Text></View>
+        <View style={styles.coordinateBlock}><Text style={styles.label}>Longitude</Text>
+          <Text selectable style={styles.coordinate}>{Math.abs(observation.longitude).toFixed(6)}° {observation.longitude >= 0 ? 'E' : 'W'}</Text></View>
+      </View>
+      <View style={styles.accuracy}>
+        <Text style={styles.accuracyValue}>{accuracy != null && accuracy >= 0 ? `${accuracy.toFixed(1)} m` : 'Unavailable'}</Text>
+        <View style={styles.accuracyText}><Text style={styles.date}>Reported accuracy</Text>
+          <Text style={styles.note}>Estimated uncertainty, not an exact address.</Text></View>
+      </View>
+      <Text selectable style={styles.utc}>{time.utc}</Text>
+      <Text style={styles.note}>Both times use this phone's clock.</Text>
+      <PlaceLookup key={`${observation.measuredAt}:${observation.latitude}:${observation.longitude}`} observation={observation} />
+      {observation.mocked ? <Text style={styles.warning}>Android marked this location as simulated.</Text> : null}
     </> : <View style={styles.empty}>
-      <Text style={styles.emptyTitle}>No locations recorded yet</Text>
-      <Text style={styles.note}>Start recording to save a location. New readings will appear here.</Text>
+      <Text style={styles.emptyTitle}>Your journal starts here.</Text>
+      <Text style={styles.note}>Start recording to save the first location and its measurement time.</Text>
     </View>}
-  </View>;
+  </View></View>;
 }
 
-const styles = StyleSheet.create({
-  panel: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: 12, padding: 18, gap: 10 },
-  eyebrow: { color: palette.muted, fontSize: 13, fontWeight: '500', marginBottom: 4 },
-  coordinate: { color: palette.ink, fontSize: 32, fontWeight: '500', letterSpacing: -1, fontVariant: ['tabular-nums'] },
-  direction: { color: palette.muted, fontSize: 22 },
-  rule: { height: 1, backgroundColor: palette.line, marginVertical: 14 },
-  row: { flexDirection: 'row', gap: 20, flexWrap: 'wrap' },
-  metric: { gap: 6, flexGrow: 1 },
-  label: { color: palette.muted, fontSize: 12 },
-  value: { color: palette.ink, fontSize: 17, fontWeight: '500', fontVariant: ['tabular-nums'] },
-  note: { color: palette.muted, fontSize: 12, lineHeight: 19 },
-  warning: { color: palette.warning, fontSize: 13 },
-  empty: { minHeight: 64, justifyContent: 'center', gap: 12 },
-  emptyTitle: { fontSize: 18, lineHeight: 25, fontWeight: '500', color: palette.ink },
+const createStyles = (palette: Palette) => StyleSheet.create({
+  shell: { padding: 5, borderRadius: 29, backgroundColor: palette.line },
+  panel: { backgroundColor: palette.surface, borderRadius: 24, padding: 20, gap: 12, borderCurve: 'continuous' },
+  timeBlock: { gap: 5, paddingVertical: 6 },
+  time: { color: palette.ink, fontSize: 36, fontFamily: fonts.medium, letterSpacing: -1, fontVariant: ['tabular-nums'] },
+  date: { color: palette.ink, fontSize: 15, fontFamily: fonts.medium },
+  coordinates: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, paddingVertical: 16 },
+  coordinateBlock: { flexGrow: 1, gap: 7 },
+  coordinate: { color: palette.ink, fontSize: 18, fontFamily: fonts.medium, fontVariant: ['tabular-nums'] },
+  label: { color: palette.muted, fontSize: 12, fontFamily: fonts.medium },
+  accuracy: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', backgroundColor: palette.accentSoft, borderRadius: 16, padding: 14, gap: 12 },
+  accuracyValue: { color: palette.accent, fontSize: 23, fontFamily: fonts.semibold },
+  accuracyText: { flex: 1, minWidth: 140, gap: 4 },
+  utc: { color: palette.ink, fontFamily: fonts.medium, fontSize: 12, marginTop: 4, fontVariant: ['tabular-nums'] },
+  note: { color: palette.muted, fontSize: 12, lineHeight: 18, fontFamily: fonts.regular },
+  warning: { color: palette.warning, fontSize: 13, fontFamily: fonts.medium },
+  empty: { minHeight: 125, justifyContent: 'center', gap: 12 },
+  emptyTitle: { fontSize: 27, lineHeight: 32, fontFamily: fonts.medium, color: palette.ink },
 });

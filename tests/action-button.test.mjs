@@ -14,9 +14,9 @@ function renderButton(width) {
   const modules = {
     'react/jsx-runtime': { jsx, jsxs: jsx },
     react: { useState: () => [width, () => {}] },
-    'react-native': { View: 'View' },
+    'react-native': { View: 'View', useColorScheme: () => 'light' },
     '@expo/ui': { Button: 'Button', Host: 'Host' },
-    '../../theme': { palette: { accent: '#173F35' } },
+    '../../theme': { useTheme: () => ({ colorScheme: 'light' }) },
   };
   vm.runInNewContext(compiled, { exports, require: name => {
     if (!(name in modules)) throw new Error(`Unexpected module ${name}`);

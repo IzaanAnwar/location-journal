@@ -18,7 +18,7 @@ Passcode verification authorizes app actions. The native signing API is not pass
 - The app checks the saved checkpoint on opening and on background callbacks. It does not perform a full forensic scan of the database at each write. The independent export verifier checks every exported signature.
 - App error signals live separately so a failed database can still be reported. These signals are not signed evidence.
 - Export is deliberately plaintext for interoperability, only after passcode authorization. The share destination receives exact locations. The file is removed when sharing completes. A crash can leave a file in app cache until the next screen initialization, when the app removes its interrupted exports.
-- No application location uploads exist. The OS, Google/Apple location services, carrier, development tooling, or a recipient selected in the share sheet may have independent data practices.
+- No automatic application location uploads exist. Optional address lookup requires confirmation for each selected observation and may send its coordinates to the OS geocoding provider. Address labels are temporary display information and are never added to signed evidence. The OS, Google/Apple location services, carrier, development tooling, or a recipient selected in the share sheet may have independent data practices.
 - Requested hourly Android updates are not delivery guarantees. Expo’s time interval applies only to Android; iOS delivery remains managed by the OS. iOS may batch, and vendor battery management may terminate Android tasks.
 
 ## Dependency review

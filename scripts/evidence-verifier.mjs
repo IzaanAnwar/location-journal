@@ -26,7 +26,7 @@ export function createEvidenceVerifier(header, expectedHead) {
       if (body.format !== header.format || body.keyId !== header.identity.keyId) throw new Error('Record identity mismatch.');
       if (body.sequence !== count + 1 || body.previousHash !== previousHash) throw new Error('Broken record sequence or hash chain.');
       if (!Number.isFinite(body.recordedAt) || !Number.isFinite(body.uptimeMs) || typeof body.runtimeId !== 'string') throw new Error('Invalid timing metadata.');
-      if (!['session-start', 'session-stop', 'location', 'interruption', 'error'].includes(body.kind)) throw new Error('Unknown event kind.');
+      if (!['session-start', 'session-stop', 'location', 'interruption', 'configuration', 'error'].includes(body.kind)) throw new Error('Unknown event kind.');
       if (body.kind === 'location') validateLocation(body.payload);
       previousHash = record.hash;
       count++;

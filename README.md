@@ -78,8 +78,16 @@ Release tags use `v<major>.<minor>.<patch>-alpha.<build-number>`, for example `v
 
 ### Hourly Android recording
 
-Android requests the highest available location accuracy once per hour while recording, using a foreground service with a visible notification. After updating from a faster recording version, stop and start recording with your passcode to apply the new interval. iOS does not support Expo's Android time interval setting.
+Android requests the highest available location accuracy once per hour while recording, using a foreground service with a visible notification. The app compares the persisted Android task options on resume and reapplies the hourly request after an update from an earlier, faster build; it records that applied configuration change in the signed journal. iOS does not support Expo's Android time interval setting.
 
 Screen-off/background recording is supported, but force-stop, shutdown, revoked permissions, or manufacturer battery controls can stop delivery. On Xiaomi, allow background location, enable background autostart if offered, and select unrestricted battery use for the app. Verify several hours of actual readings on your phone; these settings cannot guarantee delivery. Reopen the app after reboot and check recording status.
 
 An hourly reading describes one observed moment, not the intervening hour. The journal still records separations over two minutes as unobserved gaps; it never fills them with assumed locations. Android's overdue warning allows one hour plus five minutes, without changing evidence timestamps or gap records. Signatures detect certain changes to saved data; they do not certify GPS accuracy, trustworthy device time, or legal admissibility.
+
+### Reading the journal
+
+The latest observation shows local time in your phone's current timezone plus UTC. Location readings and total signed events are counted separately. Tap **What does this mean?** for the explanation of intervals without readings. An hourly reading cannot establish where the phone was between observations.
+
+**Look up address** is optional and asks for confirmation before sending that observation's coordinates to your phone's geocoding provider. It may need internet. The approximate result is for display only and is not added to signed records. Fonts are bundled locally; the app does not fetch them from Google.
+
+Open **Device & security** to see the installed app version, signing-key fingerprint, and appearance controls. See the [recording and UI audit](docs/review-2026-09-10.md) for fixes and validation limits.

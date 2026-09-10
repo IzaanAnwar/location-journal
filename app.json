@@ -5,7 +5,7 @@
     "version": "0.1.1",
     "orientation": "portrait",
     "scheme": "locationlog",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.locationlog.app",
@@ -17,7 +17,9 @@
     "android": {
       "package": "org.locationlog.app",
       "allowBackup": false,
-      "permissions": ["android.permission.RECEIVE_BOOT_COMPLETED"],
+      "permissions": [
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/location-journal-icon.png",
         "backgroundColor": "#173F35"
@@ -43,7 +45,8 @@
           "locationWhenInUsePermission": "Location Log records your coordinates and reported accuracy on this device."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-font"
     ],
     "web": {
       "bundler": "metro",
