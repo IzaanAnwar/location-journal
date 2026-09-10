@@ -19,3 +19,7 @@ test('DST transition and invalid timestamps do not invent a measurement', () => 
   assert.match(formatElapsedTime(2000, 1000), /clock/);
   assert.equal(formatElapsedTime(0, 3660000), '1h 1m ago');
 });
+
+test('UTC label is readable for timestamps with milliseconds', () => {
+  assert.equal(formatMeasurementTime(Date.parse('2026-09-10T17:46:31.283Z'), 'Asia/Kolkata').utc, '2026-09-10 17:46:31 UTC');
+});

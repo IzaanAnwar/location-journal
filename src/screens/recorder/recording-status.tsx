@@ -8,8 +8,9 @@ export function RecordingStatus({ snapshot, error }: { snapshot: RecorderSnapsho
   const isAndroid = process.env.EXPO_OS === 'android';
   const isPreview = process.env.EXPO_OS === 'web';
   const isOverdue = snapshot.isRecording && snapshot.latest && Date.now() - snapshot.latest.measuredAt > (isAndroid ? READING_OVERDUE_MS : 120_000);
-  const isMismatch = isAndroid && snapshot.isRecording && !snapshot.hasRequestedSchedule;
-  const needsAttention = snapshot.needsAttention || Boolean(error || snapshot.error) || isOverdue || isMismatch;
+  const isUnknown = isAndroid && snapshot.isRecording && snapshot.nativeIntervalMs == null;
+  const isMismatch = isAndroid && snapshot.isRecording && snapshot.nativeIntervalMs != null && !snapshot.hasRequestedSchedule;
+  const needsAttention = snapshot.needsAttention || Boolean(error || snapshot.error) || isOverdue || isMismatch || isUnknown;
   const title = isPreview ? 'Your private journal' : !snapshot.isReady ? 'Opening journal' : !snapshot.isRecording ? 'Ready when you are' : needsAttention ? 'Check recording' : 'Recording is on';
   const interval = snapshot.nativeIntervalMs;
   return <View style={styles.container}>
@@ -20,8 +21,9 @@ export function RecordingStatus({ snapshot, error }: { snapshot: RecorderSnapsho
       ? 'You can lock your screen. Android may still interrupt background delivery.' : 'Save location observations with a passcode-protected recorder.'}</Text>
     {snapshot.isRecording ? <View style={styles.schedule}>
       <Text style={styles.scheduleLabel}>Requested interval</Text>
-      <Text style={styles.scheduleValue}>{isAndroid ? interval == null ? 'Checking settings' : interval >= 60_000 ? `${Math.round(interval / 60_000)} minutes` : `${Math.round(interval / 1000)} seconds` : 'Managed by iOS'}</Text>
+      <Text style={styles.scheduleValue}>{isAndroid ? interval == null ? 'Unavailable' : interval >= 60_000 ? `${Math.round(interval / 60_000)} minutes` : `${Math.round(interval / 1000)} seconds` : 'Managed by iOS'}</Text>
     </View> : null}
+    {isUnknown ? <Text style={styles.warning}>Android did not return the active interval. The schedule cannot be verified.</Text> : null}
     {isMismatch ? <Text style={styles.warning}>The active interval does not match the hourly schedule. Reopen the app to retry updating it.</Text> : null}
     {snapshot.isRecording && !snapshot.latest ? <Text style={styles.description}>Waiting for the first location fix.</Text> : null}
     {isOverdue ? <Text style={styles.warning}>The last reading is older than expected. Check location permission and battery restrictions.</Text> : null}

@@ -42,7 +42,8 @@
     "web": "EXPO_NO_TELEMETRY=1 expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
-    "verify": "node scripts/verify-evidence.mjs"
+    "verify": "node scripts/verify-evidence.mjs",
+    "postinstall": "node scripts/patch-expo-task-options.mjs"
   },
   "private": true,
   "license": "GPL-3.0-only",

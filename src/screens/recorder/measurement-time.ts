@@ -8,7 +8,7 @@ export function formatMeasurementTime(timestamp: number, timeZone = Intl.DateTim
   const localDate = new Intl.DateTimeFormat(undefined, {
     timeZone, day: 'numeric', month: 'short', year: 'numeric',
   }).format(date);
-  return { local, localDate, timeZone, utc: date.toISOString().replace('T', ' ').replace('.000Z', ' UTC') };
+  return { local, localDate, timeZone, utc: date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC') };
 }
 
 export function formatElapsedTime(timestamp: number, now = Date.now()): string {
