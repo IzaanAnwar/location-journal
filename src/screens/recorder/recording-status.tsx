@@ -23,6 +23,7 @@ export function RecordingStatus({ snapshot, error }: { snapshot: RecorderSnapsho
       <Text style={styles.scheduleLabel}>Requested interval</Text>
       <Text style={styles.scheduleValue}>{isAndroid ? interval == null ? 'Unavailable' : interval >= 60_000 ? `${Math.round(interval / 60_000)} minutes` : `${Math.round(interval / 1000)} seconds` : 'Managed by iOS'}</Text>
     </View> : null}
+    {snapshot.isRecording ? <Text style={styles.description}>Saving limit: one eligible reading per hour. Extra callbacks are not saved.</Text> : null}
     {isUnknown ? <Text style={styles.warning}>Android did not return the active interval. The schedule cannot be verified.</Text> : null}
     {isMismatch ? <Text style={styles.warning}>The active interval does not match the hourly schedule. Reopen the app to retry updating it.</Text> : null}
     {snapshot.isRecording && !snapshot.latest ? <Text style={styles.description}>Waiting for the first location fix.</Text> : null}

@@ -40,3 +40,7 @@ Preserve the original phone and database, the exact export file and its SHA-256,
 The Bharatiya Sakshya Adhiniyam Sections 61–63 and Schedule are the starting point for electronic outputs. Section 170 affects older proceedings. These requirements are case-dependent; this format is not a legal certification. Source: https://www.indiacode.nic.in/indiacode/bitstream/123456789/20063/1/aa202347.pdf
 
 Independent timestamps remain unimplemented. A future RFC 3161 integration should commit to a nonce-bearing batch root, retain tokens and certificate validation material, and expose checkpoint delay and provider failure. CCA reference: https://www.cca.gov.in/timestamping.html
+
+## Hourly sampling policy
+
+From the hourly-enforcement patch, `location` payloads include `samplingPolicy: "hourly-first-eligible-v1"` and `minimumIntervalMs: 3600000`. The first eligible callback is retained only when both its measurement time and the app receipt time are at least one hour beyond the previous saved observation. Other delivered callbacks are not retained. This policy is applied inside the same SQLite write transaction as the gap and location records, preserving the chain and preventing concurrent writers from bypassing it. It applies to Android and iOS saved observations, even though only Android exposes the native request interval. Existing records remain intact. A restart does not reset the eligibility check. Device clock manipulation remains outside this policy's guarantees.

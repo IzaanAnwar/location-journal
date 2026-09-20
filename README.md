@@ -91,3 +91,9 @@ The latest observation shows local time in your phone's current timezone plus UT
 **Look up address** is optional and asks for confirmation before sending that observation's coordinates to your phone's geocoding provider. It may need internet. The approximate result is for display only and is not added to signed records. Fonts are bundled locally; the app does not fetch them from Google.
 
 Open **Device & security** to see the installed app version, signing-key fingerprint, and appearance controls. See the [recording and UI audit](docs/review-2026-09-10.md) for fixes and validation limits.
+
+### Enforced hourly sampling
+
+New readings pass an atomic database check before signing. Both the measurement timestamp and the save time must advance at least 60 minutes from the previous saved location. This limit persists across app restarts and recording restarts. Extra callbacks are intentionally not retained, and delayed batches do not backfill many locations at once. Existing history is never removed. New records identify `hourly-first-eligible-v1` and its interval.
+
+This is a sampling limit, not a promise of a reading exactly every hour. A backwards device-clock change delays eligibility until time catches up. Native location requests still target an hour, but the storage guard alone does not guarantee lower GPS power use.

@@ -1,12 +1,11 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { appendRecord, checkLocalCheckpoint } from '../evidence/ledger';
+import { appendRecord, appendHourlyObservation, checkLocalCheckpoint } from '../evidence/ledger';
 import { validateObservation, type Observation } from '../evidence/record';
-import { readMetadata, writeMetadataAtLeast } from '../storage/database';
+import { readMetadata } from '../storage/database';
 import { writeSecret } from '../security/secure-values';
 
 export const LOCATION_TASK = 'location-log-observations-v1';
-const GAP_THRESHOLD_MS = 120_000;
 let pendingLocationDelivery: Promise<void> = Promise.resolve();
 
 TaskManager.defineTask<{ locations: Location.LocationObject[] }>(LOCATION_TASK, async ({ data, error }) => {
@@ -37,12 +36,5 @@ async function saveObservation(location: Location.LocationObject): Promise<void>
   const observation: Observation = { ...location.coords, measuredAt: location.timestamp,
     mocked: location.mocked ?? null };
   validateObservation(observation);
-  const previous = Number(await readMetadata('last-measured-at'));
-  if (previous && observation.measuredAt - previous > GAP_THRESHOLD_MS) {
-    await appendRecord('interruption', { reason: 'observations-separated',
-      from: previous, to: observation.measuredAt, cause: 'unknown' });
-  }
-  await appendRecord('location', { ...observation, source: 'os-location-service',
-    accuracyMeaning: process.env.EXPO_OS === 'android' ? 'estimated-radius-68-percent' : 'os-estimated-radius' });
-  await writeMetadataAtLeast('last-measured-at', observation.measuredAt);
+  await appendHourlyObservation(observation);
 }
