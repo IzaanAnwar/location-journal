@@ -25,3 +25,5 @@ For each phone, retain model, OS, app build hash, signing-key protection result,
 | Airplane mode | Collection can continue where GPS is available; no network dependency |
 
 Run multi-day battery and delivery tests on more than one Android vendor and on real iPhones. Publish coverage and accuracy distributions, not a single accuracy percentage.
+
+For an Android battery test, record the app version, phone model, Android version, battery mode, and location permission. Charge the phone, start recording, lock the screen, and leave it for at least 24 hours under ordinary use. Compare Android's per-app battery usage with a similar day when recording is off. Export and verify the journal, then compare the number and spacing of actual readings with the requested hourly interval. For example, 10 readings across 24 hours reveal missed coverage even if the battery result looks good. Repeat after a reboot and with the app removed from recent apps. Device battery screens estimate usage; they are not precision measurements.

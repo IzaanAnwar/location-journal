@@ -16,13 +16,15 @@ TaskManager.defineTask<{ locations: Location.LocationObject[] }>(LOCATION_TASK, 
 
 async function processLocationDelivery(locations: Location.LocationObject[], error: TaskManager.TaskManagerError | null): Promise<void> {
   try {
+    // Ignore callbacks queued after Stop; the transaction also checks recording state.
+    if (await readMetadata('recording') !== 'true') return;
     await checkLocalCheckpoint();
     if (error) {
       await appendRecord('error', { reason: 'location-task-failed', code: error.code });
       await writeSecret('recorder-error', 'Location delivery failed. Reopen the app to check permissions.');
       return;
     }
-    if (await readMetadata('recording') !== 'true') return;
+    if (locations.length === 0) return;
     for (const location of locations) await saveObservation(location);
     await writeSecret('recorder-error', '');
   } catch {
@@ -32,7 +34,6 @@ async function processLocationDelivery(locations: Location.LocationObject[], err
 }
 
 async function saveObservation(location: Location.LocationObject): Promise<void> {
-  if (await readMetadata('recording') !== 'true') return;
   const observation: Observation = { ...location.coords, measuredAt: location.timestamp,
     mocked: location.mocked ?? null };
   validateObservation(observation);
